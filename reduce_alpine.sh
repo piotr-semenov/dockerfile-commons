@@ -1,5 +1,28 @@
 #!/bin/sh
+# reduce_alpine.sh - Reduces the Alpine system to specified batch of executables/folders.
+
 set -e
+
+usage()
+{
+  cat <<USAGE >&2
+Usage:
+    ./reduce_alpine.sh <targetdir> <names...>
+
+Description:
+    This places all the folders recursively, files, and executables along with their dependencies
+    to the target folder if missed.
+
+Examples:
+    ./reduce_alpine.sh /target busybox sh ash java
+USAGE
+  exit $1
+}
+
+if [[ $# -lt 2 ]]; then
+  usage 1
+fi
+
 
 target_dir=$1
 mkdir -p $target_dir
