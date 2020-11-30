@@ -20,6 +20,12 @@ USAGE
   exit "$1"
 }
 
+minify()
+{
+  echo "$@" | xargs -n1 echo | sort | uniq
+}
+
+
 if [ $# -lt 2 ]; then
   usage 1
 fi
@@ -35,18 +41,21 @@ others=
 for name in "$@"; do
   path=$(which "$name" || true)
   if [ "$path" ]; then
-    executables="$executables $path"
+    resolved_path=$(readlink -f "$path")
+    executables="$executables $path $resolved_path"
   else
     others="$others $name"
   fi
 done
+executables=$(minify "$executables")
+others=$(minify "$others")
 
 deps=$(echo "$executables" |\
        xargs -n1 readlink -f |\
        xargs -n1 ldd |\
        awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
-       sort | uniq |\
        xargs -n1 readlink -f)
+deps=$(minify "$deps")
 
 
 # Rsync.
