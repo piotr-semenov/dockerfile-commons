@@ -25,6 +25,11 @@ minify()
   echo "$@" | xargs -n1 echo | sort | uniq
 }
 
+resolve()
+{
+  echo "$@" | xargs -n1 readlink -f
+}
+
 
 if [ $# -lt 2 ]; then
   usage 1
@@ -41,21 +46,20 @@ others=
 for name in "$@"; do
   path=$(which "$name" || true)
   if [ "$path" ]; then
-    resolved_path=$(readlink -f "$path")
-    executables="$executables $path $resolved_path"
+    executables="$executables $path"
   else
     others="$others $name"
   fi
 done
-executables=$(minify "$executables")
+resolved_executables=$(resolve "$executables")
+executables=$(minify "$resolved_executables $executables")
 others=$(minify "$others")
 
 deps=$(echo "$executables" |\
-       xargs -n1 readlink -f |\
        xargs -n1 ldd |\
-       awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
-       xargs -n1 readlink -f)
-deps=$(minify "$deps")
+       awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }')
+resolved_deps=$(resolve "$deps")
+deps=$(minify "$resolved_deps $deps")
 
 
 # Rsync.
@@ -66,6 +70,6 @@ apk add --no-cache rsync
 rsync -Rr --links $others /etc/ssl "$target_dir"
 
 # shellcheck disable=SC2086
-rsync -R --copy-links $executables $deps "$target_dir"
+rsync -R --links $executables $deps "$target_dir"
 
 apk del rsync
