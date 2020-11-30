@@ -39,8 +39,6 @@ for name in $@; do
     others="$others $name"
   fi
 done
-echo executables=$executables
-echo others=$others
 
 deps=$(echo $executables |\
        xargs -n1 readlink -f |\
@@ -48,7 +46,6 @@ deps=$(echo $executables |\
        awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
        sort | uniq |\
        xargs -n1 readlink -f)
-echo deps=$deps
 
 
 # Rsync.
