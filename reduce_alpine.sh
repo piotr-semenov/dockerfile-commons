@@ -67,7 +67,7 @@ apk update
 apk add --no-cache rsync
 
 # shellcheck disable=SC2086
-rsync -Rr --links $others /etc/ssl "$target_dir"
+rsync -Rr --links $others "$target_dir"
 
 # shellcheck disable=SC2086
 rsync -R --links $executables $deps "$target_dir"
