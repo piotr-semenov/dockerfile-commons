@@ -35,6 +35,12 @@ if [ $# -lt 2 ]; then
   usage 1
 fi
 
+if [ "$1" = "-v" ]; then
+  verbose=1
+  shift
+else
+  verbose=0
+fi
 
 target_dir=$1
 mkdir -p "$target_dir"
@@ -61,6 +67,12 @@ deps=$(echo "$resolved_executables" |\
        xargs -n1 -I@ sh -c 'echo $(realpath $(dirname @))/$(basename @)')
 resolved_deps=$(resolve "$deps")
 deps=$(minify "$resolved_deps $deps")
+
+if [ "$verbose" -eq "1" ]; then
+  echo executables=$executables
+  echo deps=$deps
+  echo others=$others
+fi
 
 
 # Rsync.
