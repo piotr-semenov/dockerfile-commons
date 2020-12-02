@@ -48,7 +48,11 @@ target_dir=$1
 mkdir -p "$target_dir"
 shift
 
-# Locate the dependencies of the executables.
+# Split the input names into set of executables and set of others (misc. files, dirs).
+# As a result,
+#     - $executables will contain original names along with their resolutions if possible.
+#     - $others will contain only original names.
+#     - both of $executables and $others contain only the unique values.
 executables=
 others=
 for name in "$@"; do
@@ -63,6 +67,8 @@ resolved_executables=$(resolve "$executables")
 executables=$(minify "$resolved_executables $executables")
 others=$(minify "$others")
 
+# Calculate the dynamic dependencies for set of executables.
+# As a result, $deps will contain unique normalized paths.
 # shellcheck disable=SC2016
 deps=$(echo "$resolved_executables" |\
        xargs -n1 ldd |\
@@ -79,7 +85,7 @@ if [ "$verbose" -eq "1" ]; then
 fi
 
 
-# Rsync.
+# Rsync with target dir.
 apk update
 apk add --no-cache rsync
 
