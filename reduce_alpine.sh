@@ -71,7 +71,7 @@ others=$(minify "$others")
 # As a result, $deps will contain unique normalized paths.
 # shellcheck disable=SC2016
 deps=$(echo "$resolved_executables" |\
-       xargs -n1 ldd |\
+       xargs -n1 ldd 2> /dev/null |\
        awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
        xargs -n1 -I@ sh -c 'which @ || echo @' |\
        xargs -n1 -I@ sh -c 'echo $(realpath $(dirname @))/$(basename @)')
