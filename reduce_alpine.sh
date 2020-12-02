@@ -61,6 +61,7 @@ resolved_executables=$(resolve "$executables")
 executables=$(minify "$resolved_executables $executables")
 others=$(minify "$others")
 
+# shellcheck disable=SC2016
 deps=$(echo "$resolved_executables" |\
        xargs -n1 ldd |\
        awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
@@ -70,9 +71,9 @@ resolved_deps=$(resolve "$deps")
 deps=$(minify "$resolved_deps $deps")
 
 if [ "$verbose" -eq "1" ]; then
-  echo executables=$executables
-  echo deps=$deps
-  echo others=$others
+  echo executables="$executables"
+  echo deps="$deps"
+  echo others="$others"
 fi
 
 
