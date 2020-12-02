@@ -8,14 +8,16 @@ usage()
 {
   cat <<USAGE >&2
 Usage:
-    ./reduce_alpine.sh <targetdir> <names...>
+    ./reduce_alpine.sh [-v] <targetdir> <names...>
 
 Description:
     This places all the folders recursively, files, and executables along with their dependencies
     to the target folder if missed.
 
+    Use -v option to see the details.
+
 Examples:
-    ./reduce_alpine.sh /target busybox sh ash /etc java
+    ./reduce_alpine.sh -v /target busybox sh ash /etc/ssl node
 USAGE
   exit "$1"
 }
