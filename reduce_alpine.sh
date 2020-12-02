@@ -6,7 +6,7 @@ set -e
 
 usage()
 {
-  cat <<USAGE >&2
+    cat <<USAGE >&2
 Usage:
     ./reduce_alpine.sh [-v] <targetdir> <names...>
 
@@ -19,29 +19,29 @@ Description:
 Examples:
     ./reduce_alpine.sh -v /target busybox sh ash /etc/ssl node
 USAGE
-  exit "$1"
+    exit "$1"
 }
 
 minify()
 {
-  echo "$@" | xargs -n1 echo | sort | uniq
+    echo "$@" | xargs -n1 echo | sort | uniq
 }
 
 resolve()
 {
-  echo "$@" | xargs -n1 readlink -f
+    echo "$@" | xargs -n1 readlink -f
 }
 
 
 if [ $# -lt 2 ]; then
-  usage 1
+    usage 1
 fi
 
 if [ "$1" = "-v" ]; then
-  verbose=1
-  shift
+    verbose=1
+    shift
 else
-  verbose=0
+    verbose=0
 fi
 
 target_dir=$1
@@ -52,12 +52,12 @@ shift
 executables=
 others=
 for name in "$@"; do
-  path=$(which "$name" || true)
-  if [ "$path" ]; then
-    executables="$executables $path"
-  else
-    others="$others $name"
-  fi
+    path=$(which "$name" || true)
+    if [ "$path" ]; then
+        executables="$executables $path"
+    else
+        others="$others $name"
+    fi
 done
 resolved_executables=$(resolve "$executables")
 executables=$(minify "$resolved_executables $executables")
@@ -73,9 +73,9 @@ resolved_deps=$(resolve "$deps")
 deps=$(minify "$resolved_deps $deps")
 
 if [ "$verbose" -eq "1" ]; then
-  echo executables="$executables"
-  echo deps="$deps"
-  echo others="$others"
+    echo executables="$executables"
+    echo deps="$deps"
+    echo others="$others"
 fi
 
 
