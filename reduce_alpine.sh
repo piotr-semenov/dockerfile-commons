@@ -62,7 +62,7 @@ executables=$(minify "$resolved_executables $executables")
 others=$(minify "$others")
 
 deps=$(echo "$resolved_executables" |\
-       xargs -n1 ldd 2> /dev/null |\
+       xargs -n1 ldd |\
        awk '/statically/{next;} /=>/ { print $3; next; } { print $1 }' |\
        xargs -n1 -I@ sh -c 'which @ || echo @' |\
        xargs -n1 -I@ sh -c 'echo $(realpath $(dirname @))/$(basename @)')
