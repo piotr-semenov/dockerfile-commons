@@ -53,7 +53,7 @@ shift
 #     - $executables will contain original names along with their resolutions if possible.
 #     - $others will contain only original names.
 #     - both of $executables and $others contain only the unique values.
-executables=
+executables="/bin/sh /usr/bin/env /bin/busybox"
 others=
 for name in "$@"; do
     path=$(which "$name" || true)
