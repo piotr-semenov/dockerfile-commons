@@ -1,6 +1,0 @@
-FROM busybox
-
-COPY . /contextdir
-WORKDIR /contextdir
-
-CMD ["sh", "-c", "find . -mindepth 1 | xargs du -sh | sort -rnk1"]
