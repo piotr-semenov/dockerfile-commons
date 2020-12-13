@@ -1,0 +1,6 @@
+FROM busybox:latest
+
+COPY . /contextdir
+WORKDIR /contextdir
+
+CMD find . -exec du -sh {} \;
