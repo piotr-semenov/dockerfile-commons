@@ -1,22 +1,16 @@
-LOCAL_PREFIX ?=
-
-
-define DOCKERFILE_TO_BUILD_CONTEXT
+define _BUILDCONTEXT_DOCKERFILE_BODY
 FROM busybox
 
 COPY . /contextdir
 WORKDIR /contextdir
 
-CMD [\"sh\", \"-c\", \"find . -mindepth 1 | xargs du -sh | sort -rnk1\"]
+CMD ["sh", "-c", "find . -mindepth 1 | xargs du -sh | sort -rnk1"]
 endef
 
 .PHONY: test-dockerignore
-test-dockerignore: export DOCKERFILE_BODY="$(DOCKERFILE_TO_BUILD_CONTEXT)"
-test-dockerignore: export IMAGE_NAME="$(LOCAL_PREFIX)build-context"
+test-dockerignore: export DOCKERFILE_BODY=$(_BUILDCONTEXT_DOCKERFILE_BODY)
 test-dockerignore:  ## Lists all the files in the context directory accepted by .dockerignore.
-	@eval "echo $$DOCKERFILE_BODY" |\
-	 docker build -t $(IMAGE_NAME) --no-cache -f- . 1> /dev/null
-
-	@docker run --rm -t $(IMAGE_NAME)
-
-	@docker rmi $(IMAGE_NAME) 1> /dev/null
+	@IMAGE_SHA=$$(printf "$$DOCKERFILE_BODY" |\
+	              docker build -q --no-cache -f- .) &&\
+	 docker run --rm $$IMAGE_SHA &&\
+	 docker rmi $$IMAGE_SHA 1> /dev/null
