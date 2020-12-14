@@ -1,5 +1,5 @@
 #!/bin/sh
-# verify_asc.sh - Verifies the GPG file signature.
+# curl_and_gpgverify.sh - Verifies the GPG file signature.
 
 # shellcheck shell=sh
 set -e
@@ -8,7 +8,7 @@ usage()
 {
     cat <<USAGE >&2
 Usage:
-    ./verify_asc.sh [-v] <url/to/signature> <url/to/file> [keyserver]
+    ./curl_and_gpgverify.sh [-v] <url/to/signature> <url/to/file> [keyserver]
 
 Description:
     This downloads file to current directory with its GPG signature and verifies.
@@ -20,8 +20,8 @@ Requires:
     curl, gnupg packages.
 
 Examples:
-    PARIGP_PREFIX=http://pari.math.u-bordeaux.fr/pub/pari/ ./verify_asc.sh -v "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz.asc"\
-                                                                              "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz"
+    PARIGP_PREFIX=http://pari.math.u-bordeaux.fr/pub/pari/ ./curl_and_gpgverify.sh -v "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz.asc"\
+                                                                                      "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz"
 USAGE
     exit "$1"
 }
