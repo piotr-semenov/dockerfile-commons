@@ -12,3 +12,18 @@ define build_docker_image
 	    -t $(1) \
 	    $$suffix
 endef
+
+
+# Customize the goss-based testing of docker image.
+# Args:
+#     $(1): The docker image tag under test.
+#     $(2), optional: The path to the target test yaml. By default, it is "`pwd`/tests/test.yaml".
+# Examples:
+#     $(call goss_docker_image,test,tests/main.yaml)
+define goss_docker_image
+	GOSS_FILES_PATH=$(if $(2),$(shell dirname $(2)),$(PWD)/tests)\
+	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml)\
+	GOSS_FILES_STRATEGY=cp\
+	$(shell which dgoss) run --entrypoint=/bin/sh \
+	                         -it $(1)
+endef
