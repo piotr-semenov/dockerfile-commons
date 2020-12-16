@@ -6,11 +6,11 @@
 # Examples:
 #     $(call build_docker_image,"test","vcsref=$$(git rev-parse --short HEAD)","-f Dockerfile.test .")
 define build_docker_image
-	export suffix=$(if $(3),$(3),.) && docker build \
+	docker build \
 	    $$(echo $(2) | xargs -n1 -I@ echo "--build-arg @") \
 	    --no-cache \
 	    -t $(1) \
-	    $$(echo $$suffix)
+	    $(if $(3),$(subst $\",,$(3)),.)
 endef
 
 
