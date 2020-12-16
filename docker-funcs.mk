@@ -10,7 +10,7 @@ define build_docker_image
 	    $$(echo $(2) | xargs -n1 -I@ echo "--build-arg @") \
 	    --no-cache \
 	    -t $(1) \
-	    $$suffix
+	    $$(echo $$suffix)
 endef
 
 
