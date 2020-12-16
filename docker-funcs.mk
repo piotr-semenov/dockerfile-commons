@@ -7,7 +7,7 @@
 #     $(call build_docker_image,"test","vcsref=$$(git rev-parse --short HEAD)","-f Dockerfile.test .")
 define build_docker_image
 	docker build \
-	    $(shell echo $(2) | xargs -n1 -I@ echo "--build-arg @") \
+	    $(shell echo $(2) | tr ' ' '\n' | xargs -n1 -I@ echo "--build-arg @") \
 	    --no-cache \
 	    -t $(1) \
 	    $(if $(3),$(subst $\",,$(3)),.)
