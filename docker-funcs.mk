@@ -18,6 +18,7 @@ endef
 # Args:
 #     $(1): The docker image tag under test.
 #     $(2), optional: The path to the target test yaml. By default, it is "`pwd`/tests/test.yaml".
+#     $(3), optional: The whitespace-separated list of var=value environment passed to goss.
 # Examples:
 #     $(call goss_docker_image,test,tests/main.yaml)
 define goss_docker_image
@@ -25,5 +26,6 @@ define goss_docker_image
 	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml)\
 	GOSS_FILES_STRATEGY=cp\
 	$(shell which dgoss) run --entrypoint=/bin/sh \
+	                         $$(echo $(3) | xargs -n1 -I@ echo "--env @") \
 	                         -it $(1)
 endef
