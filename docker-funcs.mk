@@ -1,3 +1,10 @@
+define _kv_extract
+	$(shell echo $(1) |\
+	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ]+)[ \$$]/\1=\2;/gp' |\
+	        tr ';' '\n')
+endef
+
+
 # Customize the build process of docker image.
 # Args:
 #     $(1) (str): The target image tag.
@@ -5,9 +12,10 @@
 #     $(3) (str, optional): The additional flags and args for `docker build`. By default, it is "-f Dockerfile `pwd`".
 # Examples:
 #     $(call build_docker_image,"test","vcsref=$$(git rev-parse --short HEAD)","-f Dockerfile.test .")
+
 define build_docker_image
 	docker build \
-	    $(shell echo $(2) | tr ' ' '\n' | xargs -n1 -I@ echo "--build-arg @") \
+	    $(echo '$(call _kv_extract,$(2))' | xargs -n1 -I@ echo "--build-arg '@'") \
 	    --no-cache \
 	    -t $(1) \
 	    $(if $(3),$(subst $\",,$(3)),.)
@@ -26,6 +34,6 @@ define goss_docker_image
 	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml)\
 	GOSS_FILES_STRATEGY=cp\
 	$(shell which dgoss) run --entrypoint=/bin/sh \
-	                         $(shell echo $(3) | tr ' ' '\n' | xargs -n1 -I@ echo "--env @") \
+	                         $(echo '$(call _kv_extract,$(3))' | xargs -n1 -I@ echo "--env '@'") \
 	                         -it $(1)
 endef
