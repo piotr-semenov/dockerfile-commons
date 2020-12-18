@@ -1,7 +1,6 @@
 define _kv_extract
 	$(shell echo $(1) |\
-	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ]+)/\1=\2;/gp' |\
-	        tr ';' '\n')
+	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ])[ ]?/\1=\2:/gp')
 endef
 
 
@@ -15,7 +14,7 @@ endef
 
 define build_docker_image
 	docker build \
-	    $(shell echo '$(call _kv_extract,$(2))' | xargs -n1 -I@ echo "--build-arg '@'") \
+	    $(shell echo $(call _kv_extract,$(2)) | tr ':' '\n' | xargs -I@ echo "--build-arg '@'") \
 	    --no-cache \
 	    -t $(1) \
 	    $(if $(3),$(subst $\",,$(3)),.)
@@ -34,6 +33,6 @@ define goss_docker_image
 	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml)\
 	GOSS_FILES_STRATEGY=cp\
 	$(shell which dgoss) run --entrypoint=/bin/sh \
-	                         $(shell echo $(call _kv_extract,$(3)) | xargs -n1 -I@ echo "--env '@'") \
+	                         $(shell echo $(call _kv_extract,$(3)) | tr ':' '\n' | xargs -I@ echo "--env '@'") \
 	                         -it $(1)
 endef
