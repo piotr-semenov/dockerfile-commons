@@ -13,8 +13,8 @@ define _wait_healthy_containers
 endef
 
 
-scan-anchore: export DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX)
 scan-anchore:  ## Scans the \$IMAGE_NAME for vulnerabilities via Anchore.
+	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
 	@curl -q https://engine.anchore.io/docs/quickstart/docker-compose.yaml 2> /dev/null 1> $(DOCKER_COMPOSE_FILE)
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
