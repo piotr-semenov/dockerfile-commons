@@ -8,7 +8,7 @@ endef
 
 define _wait_healthy_containers
 	until ! $(call _check_service_are_unhealthy,$(1),$(2)); \
-	 do echo "Services $(2): waiting for status 'healthy'..." && sleep 1; \
+	 do echo "Services $(2): waiting for status 'healthy'..." && sleep 10; \
 	done;
 endef
 
