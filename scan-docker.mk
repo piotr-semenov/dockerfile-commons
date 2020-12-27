@@ -109,3 +109,6 @@ scan-clair:  ## Scans the \$IMAGE_NAME for vulnerabilities via Clair.
 	                                              $(IMAGE_NAME)
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
 	@rm -f $(DOCKER_COMPOSE_FILE)
+
+
+scan-docker: scan-anchore scan-clair;  ## Calls the scan-anchore and scan-clair targets.
