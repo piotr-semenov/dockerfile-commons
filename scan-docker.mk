@@ -3,7 +3,7 @@ IMAGE_NAME ?=
 define _check_service_are_unhealthy
 	docker-compose -f $(1) ps -q $(2) |\
 	xargs -I@ docker inspect -f '{{if .State.Running}}{{ .State.Health.Status }}{{end}}' @ |\
-	grep -qv healthy
+	grep -qvw healthy
 endef
 
 define _wait_healthy_containers
