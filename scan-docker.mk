@@ -27,3 +27,85 @@ scan-anchore:  ## Scans the \$IMAGE_NAME for vulnerabilities via Anchore.
 	                          anchore-cli evaluate check $(IMAGE_NAME)"
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
 	@rm -f $(DOCKER_COMPOSE_FILE)
+
+
+define _CLAIR_DOCKERCOMPOSE_BODY
+---
+version: "3.7"
+
+services:
+  clair-db:
+    container_name: postgres
+    image: arminc/clair-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: pg_isready
+      interval: 1s
+    networks:
+      - clair
+
+  clair:
+    container_name: clair
+    image: arminc/clair-local-scan
+    restart: unless-stopped
+    ports:
+      - "6060:6060"
+    healthcheck:
+      test: wget --spider http://127.0.0.1:6061/health
+      interval: 1s
+    networks:
+      - clair
+    links:
+      - clair-db
+
+  clair-scanner:
+    container_name: scanner
+    image: ubuntu:latest
+    environment:
+      - "DEBIAN_FRONTEND=noninteractive"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    command:
+      - "/bin/sh"
+      - -c
+      - |
+        apt-get update &&\
+        apt-get install wget -y &&\
+        rm -rf /var/lib/apt/lists/* &&\
+        \
+        wget -qO /usr/local/bin/clair-scanner https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 &&\
+        chmod +x /usr/local/bin/clair-scanner &&\
+        \
+        tail -f /dev/null
+    ports:
+      - "9279:9279"
+    healthcheck:
+      test: /usr/local/bin/clair-scanner --help
+      interval: 1s
+    networks:
+      - clair
+    links:
+      - clair
+
+networks:
+  clair:
+    external: false
+endef
+
+scan-clair: export DOCKER_COMPOSE_FILE_BODY=$(call _CLAIR_DOCKERCOMPOSE_BODY,)
+scan-clair:  ## Scans the \$IMAGE_NAME for vulnerabilities via Clair.
+	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
+	@$(eval DOCKER_GATEWAY:=$(shell docker network inspect bridge --format "{{range .IPAM.Config}}{{.Gateway}}{{end}}"))
+	@echo "$$DOCKER_COMPOSE_FILE_BODY" > $(DOCKER_COMPOSE_FILE)
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
+	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
+	-@docker exec -i scanner\
+	                 /usr/local/bin/clair-scanner --ip "host.docker.internal"\
+	                                              --clair="http://$(DOCKER_GATEWAY):6060"\
+	                                              --exit-when-no-features=false\
+	                                              --all\
+	                                              $(IMAGE_NAME)
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	@rm -f $(DOCKER_COMPOSE_FILE)
