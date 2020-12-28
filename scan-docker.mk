@@ -1,4 +1,4 @@
-IMAGE_NAME ?=
+IMAGE_NAMES ?=
 
 define _check_service_are_unhealthy
 	docker-compose -f $(1) ps -q $(2) |\
@@ -18,13 +18,15 @@ scan-anchore:  ## Scans the \$IMAGE_NAME for vulnerabilities via Anchore.
 	@curl -q https://engine.anchore.io/docs/quickstart/docker-compose.yaml 2> /dev/null 1> $(DOCKER_COMPOSE_FILE)
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
-	@docker run --net=host\
-	            -e ANCHORE_CLI_URL=http://localhost:8228/v1/\
-	            -i anchore/engine-cli\
-	            /bin/bash -c "anchore-cli image add $(IMAGE_NAME) 1> /dev/null &&\
-	                          anchore-cli image wait $(IMAGE_NAME) 1> /dev/null &&\
-	                          anchore-cli image vuln $(IMAGE_NAME) all &&\
-	                          anchore-cli evaluate check $(IMAGE_NAME)"
+	@for IMAGE_NAME in $(IMAGE_NAMES); do \
+	  docker run --net=host\
+	              -e ANCHORE_CLI_URL=http://localhost:8228/v1/\
+	              -i anchore/engine-cli\
+	              /bin/bash -c "anchore-cli image add $$IMAGE_NAME 1> /dev/null &&\
+	                            anchore-cli image wait $$IMAGE_NAME 1> /dev/null &&\
+	                            anchore-cli image vuln $$IMAGE_NAME all &&\
+	                            anchore-cli evaluate check $$IMAGE_NAME"; \
+	done
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
 	@rm -f $(DOCKER_COMPOSE_FILE)
 
@@ -101,12 +103,14 @@ scan-clair:  ## Scans the \$IMAGE_NAME for vulnerabilities via Clair.
 	@echo "$$DOCKER_COMPOSE_FILE_BODY" > $(DOCKER_COMPOSE_FILE)
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
-	-@docker exec -i scanner\
+	@for IMAGE_NAME in $(IMAGE_NAMES); do \
+	  docker exec -i scanner\
 	                 /usr/local/bin/clair-scanner --ip "host.docker.internal"\
 	                                              --clair="http://$(DOCKER_GATEWAY):6060"\
 	                                              --exit-when-no-features=false\
 	                                              --all\
-	                                              $(IMAGE_NAME)
+	                                              $$IMAGE_NAME; \
+	done
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
 	@rm -f $(DOCKER_COMPOSE_FILE)
 
