@@ -1,3 +1,5 @@
+These Makefile snippets cover the most of Docker development: lint, test and scan for the vulnerabilities.
+
 ## POSIX-Compliant Shell Scripts for Alpine Linux
 
 | File | Description |
