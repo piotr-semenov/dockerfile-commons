@@ -3,6 +3,16 @@ define _kv_extract
 	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ])[ ]?/\1=\2:/gp')
 endef
 
+define _uuidgen_dockerfile_body
+FROM alpine
+
+RUN apk update &&\
+    apk add --no-cache util-linux
+
+ENTRYPOINT ["uuidgen"]
+endef
+export _uuidgen_dockerfile_body
+
 
 # Customize the build process of docker image.
 # Args:
@@ -35,4 +45,19 @@ define goss_docker_image
 	$(shell which dgoss) run --entrypoint=/bin/sh \
 	                         $(shell echo $(call _kv_extract,$(3)) | tr ':' '\n' | xargs -I@ echo "--env '@'") \
 	                         -it $(1)
+endef
+
+
+# Generates the UUID out-of-the-box by build-run-removal of docker image.
+# Args:
+#    $(1): The uuidgen program options.
+# Examples:
+#    $(call generate_build,--md5 --namespace @dns --name "www.google.com")
+# Returns:
+#    Created UUID value.
+define generate_uuid
+	export IMAGE_SHA=$$(echo "$$_uuidgen_dockerfile_body" |\
+	                    docker build -q --no-cache -f- .);\
+	docker run --rm $$IMAGE_SHA $(1) &&\
+	docker rmi $$IMAGE_SHA 1> /dev/null
 endef
