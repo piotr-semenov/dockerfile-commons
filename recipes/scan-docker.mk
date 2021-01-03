@@ -16,9 +16,10 @@ endef
 scan-anchore:
 	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
 	@curl -q https://engine.anchore.io/docs/quickstart/docker-compose.yaml 2> /dev/null 1> $(DOCKER_COMPOSE_FILE)
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d 1> /dev/null 2>&1
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
 	@for IMAGE_NAME in $(IMAGE_NAMES); do \
+	  echo "=== Anchore: $$IMAGE_NAME ===" &&\
 	  docker run --net=host\
 	              -e ANCHORE_CLI_URL=http://localhost:8228/v1/\
 	              -i anchore/engine-cli\
@@ -27,7 +28,7 @@ scan-anchore:
 	                            anchore-cli image vuln $$IMAGE_NAME all &&\
 	                            anchore-cli evaluate check $$IMAGE_NAME"; \
 	done
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) down 1> /dev/null 2>&1
 	@rm -f $(DOCKER_COMPOSE_FILE)
 
 
@@ -101,17 +102,18 @@ scan-clair:
 	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
 	@$(eval DOCKER_GATEWAY:=$(shell docker network inspect bridge --format "{{range .IPAM.Config}}{{.Gateway}}{{end}}"))
 	@echo "$$DOCKER_COMPOSE_FILE_BODY" > $(DOCKER_COMPOSE_FILE)
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d 1> /dev/null 2>&1
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
 	@for IMAGE_NAME in $(IMAGE_NAMES); do \
+	  echo "=== Clair: $$IMAGE_NAME ===\n" &&\
 	  docker exec -i scanner\
 	                 /usr/local/bin/clair-scanner --ip "host.docker.internal"\
 	                                              --clair="http://$(DOCKER_GATEWAY):6060"\
 	                                              --exit-when-no-features=false\
 	                                              --all\
-	                                              $$IMAGE_NAME; \
+	                                              $$IMAGE_NAME || true; \
 	done
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) down 1> /dev/null 2>&1
 	@rm -f $(DOCKER_COMPOSE_FILE)
 
 
