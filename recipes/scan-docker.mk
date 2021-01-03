@@ -13,7 +13,7 @@ define _wait_healthy_containers
 endef
 
 
-scan-anchore:  ## Scans the \$IMAGE_NAME for vulnerabilities via Anchore.
+scan-anchore:
 	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
 	@curl -q https://engine.anchore.io/docs/quickstart/docker-compose.yaml 2> /dev/null 1> $(DOCKER_COMPOSE_FILE)
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
@@ -97,7 +97,7 @@ networks:
 endef
 
 scan-clair: export DOCKER_COMPOSE_FILE_BODY=$(call _CLAIR_DOCKERCOMPOSE_BODY,)
-scan-clair:  ## Scans the \$IMAGE_NAME for vulnerabilities via Clair.
+scan-clair:
 	@$(eval DOCKER_COMPOSE_FILE:=$(shell mktemp docker-compose.yaml.XXXXXX))
 	@$(eval DOCKER_GATEWAY:=$(shell docker network inspect bridge --format "{{range .IPAM.Config}}{{.Gateway}}{{end}}"))
 	@echo "$$DOCKER_COMPOSE_FILE_BODY" > $(DOCKER_COMPOSE_FILE)
@@ -115,4 +115,4 @@ scan-clair:  ## Scans the \$IMAGE_NAME for vulnerabilities via Clair.
 	@rm -f $(DOCKER_COMPOSE_FILE)
 
 
-scan-docker: scan-anchore scan-clair;  ## Calls the scan-anchore and scan-clair targets.
+scan-docker: scan-anchore scan-clair;  ## Scans the docker images listed in $IMAGE_NAMES for vulnerabilities via Anchore and Clair.

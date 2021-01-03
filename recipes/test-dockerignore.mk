@@ -9,7 +9,7 @@ endef
 
 .PHONY: test-dockerignore
 test-dockerignore: export DOCKERFILE_BODY=$(_BUILDCONTEXT_DOCKERFILE_BODY)
-test-dockerignore:  ## Lists all the files in the context directory accepted by .dockerignore.
+test-dockerignore:  ## Lists all the files in the docker build context.
 	@IMAGE_SHA=$$(printf "$$DOCKERFILE_BODY" |\
 	              docker build -q --no-cache -f- .) &&\
 	 docker run --rm $$IMAGE_SHA &&\
