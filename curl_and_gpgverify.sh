@@ -27,6 +27,20 @@ USAGE
 }
 
 
+if [ $# -lt 2 ]; then
+    usage 1
+fi
+
+apk update
+missing_prelims=
+for prelim in curl gnupg; do
+    if ! (apk info | grep -w $prelim 1> /dev/null); then
+        missing_prelims="$missing_prelims $prelim"
+    fi
+done
+apk --no-cache add --virtual .prelims $missing_prelims
+
+
 if [ "$1" = "-v" ]; then
     curl_opts=
     gpg_redirection=

@@ -87,7 +87,9 @@ fi
 
 # Rsync with target dir.
 apk update
-apk add --no-cache rsync
+if ! (apk info | grep -w rsync 1> /dev/null); then
+    apk --no-cache add --virtual .prelims rsync
+fi
 
 # shellcheck disable=SC2086
 rsync -Rr --links $others "$target_dir"
