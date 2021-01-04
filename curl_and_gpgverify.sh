@@ -18,10 +18,11 @@ Description:
 
 Requires:
     curl, gnupg packages.
+    Note, if any preliminary is missed script will install, use, and remove it.
 
 Examples:
-    PARIGP_PREFIX=http://pari.math.u-bordeaux.fr/pub/pari/ ./curl_and_gpgverify.sh -v "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz.asc"\
-                                                                                      "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz"
+    export PARIGP_PREFIX=http://pari.math.u-bordeaux.fr/pub/pari/ && ./curl_and_gpgverify.sh -v "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz.asc"\
+                                                                                                "$PARIGP_PREFIX/GP2C/gp2c-0.0.12.tar.gz"
 USAGE
     exit "$1"
 }
