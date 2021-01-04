@@ -1,3 +1,4 @@
+-include .env
 include docker-funcs.mk recipes/*.mk
 
 
