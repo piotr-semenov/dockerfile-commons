@@ -2,7 +2,7 @@ HADOLINT_CONFIG ?= `pwd`/dockerfile-commons/.hadolint.yaml
 
 
 .PHONY: lint-dockerfiles
-lint-dockerfiles: export FILES = $(shell find . -type f -name "Dockerfile.*")
+lint-dockerfiles: export FILES = $(shell find . -type f -name "Dockerfile*")
 lint-dockerfiles:  ## Hadolints all the files matching the pattern Dockerfile.*.
 	@for p in $$FILES; do \
 	  docker run --rm \
