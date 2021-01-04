@@ -97,4 +97,5 @@ rsync -Rr --links $others "$target_dir"
 # shellcheck disable=SC2086
 rsync -R --links $executables $deps "$target_dir"
 
-apk del rsync
+apk del .prelims 2> /dev/null
+exit 0

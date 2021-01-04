@@ -64,3 +64,7 @@ if ! output=$(gpg --verify "$signature" "$file" 2>&1); then
 
     gpg --verify "$signature" "$file" $gpg_redirection
 fi
+exit_code=$?
+
+apk del .prelims
+exit $exit_code
