@@ -1,3 +1,5 @@
+SHELL:=/bin/bash
+
 -include .env
 -include $(shell echo $(CURDIR)/$(dir $(firstword $(MAKEFILE_LIST))){.,dockerfile-commons}{/docker-funcs.mk,/recipes/*.mk})
 
