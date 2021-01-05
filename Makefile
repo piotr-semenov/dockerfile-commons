@@ -1,7 +1,8 @@
 -include .env
-include docker-funcs.mk recipes/*.mk
+-include $(shell echo $(CURDIR)/$(dir $(firstword $(MAKEFILE_LIST))){.,dockerfile-commons}{/docker-funcs.mk,/recipes/*.mk})
 
 
+.DEFAULT_GOAL := help
 .PHONY: help
 help:  ## Prints this usage.
 	@echo 'Recipes:'
