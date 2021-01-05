@@ -42,6 +42,12 @@ IMAGE_NAMES="postgres:9 busybox"
 
 Now you do the job via `make lint-dockerfiles test-dockerignore scan-docker clean-docker`.
 
+Also you can include these recipes in your own Makefile with lines below:
+
+```text
+include /path/to/dockerfile-commons/Makefile
+```
+
 ## Projects using [dockerfile-commons](https://github.com/piotr-semenov/dockerfile-commons)
 
 | Project | Description |
