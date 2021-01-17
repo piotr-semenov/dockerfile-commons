@@ -37,7 +37,7 @@ Please, find the example .env file below:
 
 ```text
 HADOLINT_CONFIG=$$PWD/.hadolint.yaml
-IMAGE_NAMES="postgres:9 busybox"
+IMAGE_NAMES=postgres:9 busybox
 ```
 
 Now you do the job via `make lint-dockerfiles test-dockerignore scan-docker clean-docker`.
