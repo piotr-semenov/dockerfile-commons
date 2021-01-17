@@ -105,7 +105,7 @@ scan-clair:
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d 1> /dev/null 2>&1
 	@$(call _wait_healthy_containers,$(DOCKER_COMPOSE_FILE),)
 	@for IMAGE_NAME in $(IMAGE_NAMES); do \
-	  echo "=== Clair: $$IMAGE_NAME ===\n" &&\
+	  echo "=== Clair: $$IMAGE_NAME ===" && echo &&\
 	  docker exec -i scanner\
 	                 /usr/local/bin/clair-scanner --ip "host.docker.internal"\
 	                                              --clair="http://$(DOCKER_GATEWAY):6060"\
