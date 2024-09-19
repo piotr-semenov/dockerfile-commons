@@ -72,3 +72,15 @@ define generate_uuid
 	docker run --rm $$IMAGE_SHA $(1) &&\
 	docker rmi $$IMAGE_SHA 1> /dev/null
 endef
+
+
+# Gets the latest version of any GitHub repo.
+# Args:
+#    $(1): The repo URL.
+# Examples:
+#    $(call get_latest_version,"https://github.com/leanprover/elan.git"))
+# Returns:
+#    Latest version.
+define get_latest_version
+	git ls-remote --tags --refs --sort="v:refname" $(1) | tail -n1 | sed 's/.*\/v*//'
+endef
