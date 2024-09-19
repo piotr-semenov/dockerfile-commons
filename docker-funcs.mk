@@ -36,15 +36,26 @@ endef
 #     $(1) (str): The docker image tag under test.
 #     $(2) (str, optional): The path to the target test yaml. By default, it is "`pwd`/tests/test.yaml".
 #     $(3) (str, optional): The whitespace-separated list of var=value environment passed to goss.
+#     $(4) (str, optional): The extra options to goss.
 # Examples:
 #     $(call goss_docker_image,test,tests/main.yaml)
 define goss_docker_image
-	GOSS_FILES_PATH=$(if $(2),$(shell dirname $(2)),$(PWD)/tests)\
-	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml)\
-	GOSS_FILES_STRATEGY=cp\
-	$(shell which dgoss) run --entrypoint=/bin/sh \
-	                         $(shell echo $(call _kv_extract,$(3)) | tr ':' '\n' | xargs -I@ echo "--env '@'") \
-	                         -it $(1)
+	if (! command dgoss > /dev/null 2>&1) || (! command goss > /dev/null 2>&1); \
+	then \
+	    dgoss() { docker run --rm \
+	                         --entrypoint "dgoss" \
+	                         -v /var/run/docker.sock:/var/run/docker.sock \
+	                         -v `pwd`:/workdir:ro \
+	                         -w /workdir \
+	                         $$(env | grep ^GOSS_ | cut -f1 -d= | sed 's/^/-e /') \
+	                         semenovp/tiny-dgoss "$$@"; }; \
+	fi; \
+	GOSS_FILES_PATH=$(if $(2),$(shell dirname $(2)),$(PWD)/tests) \
+	GOSS_FILE=$(if $(2),$(shell basename $(2)),test.yaml) \
+	GOSS_FILES_STRATEGY=cp \
+	dgoss run $(shell echo $(4)) --entrypoint=/bin/sh \
+	          $(shell echo $(call _kv_extract,$(3)) | tr ':' '\n' | xargs -I@ echo "--env '@'") \
+	          -it $(1)
 endef
 
 
