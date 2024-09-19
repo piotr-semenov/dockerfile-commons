@@ -1,6 +1,6 @@
 define _kv_extract
 	$(shell echo $(1) |\
-	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ])[ ]?/\1=\2:/gp')
+	        sed -nE 's/([^= ]+)=("[^"]+"|[^ ]+)[ ]?/\1=\2:/gp')
 endef
 
 define _uuidgen_dockerfile_body
